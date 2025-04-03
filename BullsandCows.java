@@ -15,6 +15,7 @@ public class BullsandCows {
             while (guessCount < 20) {
                 String serverMsg = in.readLine();
                 if (serverMsg.equals("GO")) {
+                    System.out.println();
                     System.out.println("Welcome to Bulls and Cows. You will try to guess a 4 digit code using only the digits 0-9.");
                     System.out.println("You will lose the game if you are unable to guess the code correctly in 20 guesses. Good Luck!");
                     System.out.println();
