@@ -1,124 +1,101 @@
 /*
-CSC 460 Program #2 [Client-Server (multi threaded) Bulls and Cows]
+CSC 460 
+Program #2 [Client-Server (multi threaded) Bulls and Cows]
 Name: Oshan Maharjan
  */
 
 /**
- * The gameThread class handles the server-side logic for a single game session
- * of Bulls and Cows. It manages client communication, generates the secret code,
- * and processes user guesses.
+ * The BullsandCows class represents the client-side implementation of the Bulls and Cows game.
+ * It connects to the game server, facilitates user interaction, and processes server responses.
  */
 import java.io.*;
 import java.net.*;
-import java.util.Random;
+import java.util.Scanner;
 
-public class gameThread extends Thread {
-    private Socket socket;           // Client socket connection
-    private BufferedReader in;       // Input stream from client
-    private PrintWriter out;         // Output stream to client
-    private String code;             // Secret code to be guessed
-    private int guessCount = 0;      // Number of guesses made by the client
+public class BullsandCows {
+    public static void main(String[] args) {
+        final int port = 12345; // Server port number
 
-    /**
-     * Constructor to initialize the game thread with the client socket.
-     *
-     * @param socket The client socket connection
-     */
-    public gameThread(Socket socket) {
-        this.socket = socket;
-    }
+        try (
+                // Establish connection to the server
+                Socket socket = new Socket("localhost", port);
+                // Input stream to receive data from the server
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                // Output stream to send data to the server
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                // Scanner to read user input from the console
+                Scanner scanner = new Scanner(System.in)
+        ) {
+            int guessCount = 0; // Counter for the number of guesses made
+            String guess = "";  // Stores the user's current guess
 
-    /**
-     * The run method contains the main game loop, handling client communication,
-     * generating the secret code, and processing guesses.
-     */
-    @Override
-    public void run() {
-        try {
-            // Initialize input and output streams for client communication
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            // Game loop: continues until the user has made 20 guesses or guesses the correct code
+            while (guessCount < 20) {
+                String serverMsg = in.readLine(); // Read message from the server
 
-            // Generate the secret code for this game session
-            generateCode();
+                if ("GO".equals(serverMsg)) {
 
-            String result = "    "; // Initialize result with four spaces
-
-            // Main game loop: continue until the client guesses correctly or reaches 20 attempts
-            while (!result.equals("BBBB") && guessCount < 20) {
-                if (guessCount == 0) {
-                    out.println("GO"); // Send start signal to client
+                    // Initial server message to start the game
+                    System.out.println();
+                    System.out.println("Welcome to Bulls and Cows. You will try to guess a 4-digit code using");
+                    System.out.println("only the digits 0-9. You will lose the game if you are unable to guess");
+                    System.out.println("the code correctly in 20 guesses. Good Luck!");
+                    System.out.println();
                 } else {
-                    String guess = in.readLine(); // Read client's guess
-                    if (guess.equalsIgnoreCase("QUIT")) break; // Exit if client chooses to quit
+                    // Display the user's guess and the server's response
+                    System.out.println(guess + " " + serverMsg);
 
-                    result = processGuess(guess); // Process the guess and get feedback
-                    out.println(result); // Send feedback to client
+                    if ("BBBB".equals(serverMsg)) {
+                        // User has guessed the correct code
+                        System.out.println();
+                        System.out.println("Congratulations!!! You guessed the code correctly in " + guessCount + " guesses.");
+                        break;
+                    }
                 }
-                guessCount++;
+
+                // Prompt the user for their next guess
+                do {
+                    System.out.print("Please enter your guess for the secret code or “QUIT” : ");
+                    guess = scanner.nextLine().trim();
+
+                    if ("QUIT".equalsIgnoreCase(guess)) {
+                        // User chooses to quit the game
+                        System.out.println();
+                        System.out.println("Goodbye, but please play again!");
+                        out.println("QUIT");
+                        return;
+                    }
+                } while (!verifyInput(guess)); // Repeat until a valid input is provided
+
+                out.println(guess); // Send the valid guess to the server
+                guessCount++;       // Increment the guess counter
             }
 
-            socket.close(); // Close the socket connection after the game ends
+            if (guessCount == 20) {
+                // User has reached the maximum number of guesses
+                System.out.println();
+                System.out.println("Sorry – the game is over. You did not guess the code correctly in 20 moves.");
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Generates a random 4-digit secret code with digits ranging from 0 to 9.
-     * Digits may repeat.
-     */
-    private void generateCode() {
-        Random rand = new Random();
-        StringBuilder sb = new StringBuilder(4);
-        for (int i = 0; i < 4; i++) {
-            sb.append(rand.nextInt(10));
+    public static boolean verifyInput(String input) {
+        if ("QUIT".equalsIgnoreCase(input)) {
+            return true;
         }
-        code = sb.toString();
-    }
-
-    /**
-     * Processes the client's guess by comparing it to the secret code and
-     * returns feedback in the form of 'B' (correct digit and position),
-     * 'C' (correct digit, wrong position), or spaces.
-     *
-     * @param guess The client's 4-digit guess
-     * @return A 4-character string providing feedback on the guess
-     */
-    private String processGuess(String guess) {
-        StringBuilder cs = new StringBuilder(); // Stores 'C' feedback
-        StringBuilder bs = new StringBuilder(); // Stores 'B' feedback
-        boolean[] codeUsed = new boolean[4];    // Tracks matched positions in code
-        boolean[] guessUsed = new boolean[4];   // Tracks matched positions in guess
-
-        // First pass: Check for 'B's (correct digit and position)
-        for (int i = 0; i < 4; i++) {
-            if (guess.charAt(i) == code.charAt(i)) {
-                bs.append('B');
-                codeUsed[i] = true;
-                guessUsed[i] = true;
+        if (input.length() != 4) {
+            System.out.println("Improperly formatted guess.");
+            return false;
+        }
+        for (char c : input.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                System.out.println("Improperly formatted guess.");
+                return false;
             }
         }
-
-        // Second pass: Check for 'C's (correct digit, wrong position)
-        for (int i = 0; i < 4; i++) {
-            if (!guessUsed[i]) {
-                for (int j = 0; j < 4; j++) {
-                    if (!codeUsed[j] && guess.charAt(i) == code.charAt(j)) {
-                        cs.append('C');
-                        codeUsed[j] = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Combine 'C's and 'B's, then pad with spaces to ensure a 4-character response
-        StringBuilder result = new StringBuilder(cs.toString()).append(bs.toString());
-        while (result.length() < 4) {
-            result.append(' ');
-        }
-
-        return result.toString();
+        return true;
     }
 }
