@@ -1,12 +1,12 @@
-import java.io.*;
-import java.net.*;
-import java.util.Random;
-
 /**
  * The gameThread class handles the server-side logic for a single game session
  * of Bulls and Cows. It manages client communication, generates the secret code,
  * and processes user guesses.
  */
+import java.io.*;
+import java.net.*;
+import java.util.Random;
+
 public class gameThread extends Thread {
     private Socket socket;           // Client socket connection
     private BufferedReader in;       // Input stream from client
