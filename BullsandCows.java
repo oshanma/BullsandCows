@@ -31,6 +31,7 @@ public class BullsandCows {
                     System.out.print("Please enter your guess for the secret code or “QUIT” : ");
                     guess = scanner.nextLine().trim();
                     if (guess.equalsIgnoreCase("QUIT")) {
+                        System.out.println();
                         System.out.println("Goodbye but please play again!");
                         out.println("QUIT");
                         return;
@@ -42,6 +43,7 @@ public class BullsandCows {
             }
 
             if (guessCount == 20) {
+                System.out.println();
                 System.out.println("Sorry – the game is over. You did not guess the code correctly in 20 moves.");
             }
 
