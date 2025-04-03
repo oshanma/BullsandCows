@@ -1,11 +1,11 @@
-import java.io.*;
-import java.net.*;
-import java.util.Scanner;
-
 /**
  * The BullsandCows class represents the client-side implementation of the Bulls and Cows game.
  * It connects to the game server, facilitates user interaction, and processes server responses.
  */
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
 public class BullsandCows {
     public static void main(String[] args) {
         final int port = 12345; // Server port number
@@ -28,7 +28,7 @@ public class BullsandCows {
                 String serverMsg = in.readLine(); // Read message from the server
 
                 if ("GO".equals(serverMsg)) {
-                    
+
                     // Initial server message to start the game
                     System.out.println();
                     System.out.println("Welcome to Bulls and Cows. You will try to guess a 4-digit code using");
