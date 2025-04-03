@@ -2,50 +2,76 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
+/**
+ * The BullsandCows class represents the client-side implementation of the Bulls and Cows game.
+ * It connects to the game server, facilitates user interaction, and processes server responses.
+ */
 public class BullsandCows {
+
+    /**
+     * The main method establishes a connection to the server and manages the game loop.
+     *
+     * @param args Command-line arguments (not used).
+     */
     public static void main(String[] args) {
-        int port = 12345;
-        try (Socket socket = new Socket("localhost", port);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             Scanner scanner = new Scanner(System.in)) {
+        final int port = 12345; // Server port number
 
-            int guessCount = 0;
-            String guess = "";
+        try (
+                // Establish connection to the server
+                Socket socket = new Socket("localhost", port);
+                // Input stream to receive data from the server
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                // Output stream to send data to the server
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                // Scanner to read user input from the console
+                Scanner scanner = new Scanner(System.in)
+        ) {
+            int guessCount = 0; // Counter for the number of guesses made
+            String guess = "";  // Stores the user's current guess
 
+            // Game loop: continues until the user has made 20 guesses or guesses the correct code
             while (guessCount < 20) {
-                String serverMsg = in.readLine();
-                if (serverMsg.equals("GO")) {
+                String serverMsg = in.readLine(); // Read message from the server
+
+                if ("GO".equals(serverMsg)) {
+                    // Initial server message to start the game
                     System.out.println();
-                    System.out.println("Welcome to Bulls and Cows. You will try to guess a 4 digit code using ");
-                    System.out.println("only the digits 0-9). You will lose the game if you are unable to guess ");
+                    System.out.println("Welcome to Bulls and Cows. You will try to guess a 4-digit code using");
+                    System.out.println("only the digits 0-9. You will lose the game if you are unable to guess");
                     System.out.println("the code correctly in 20 guesses. Good Luck!");
                     System.out.println();
                 } else {
+                    // Display the user's guess and the server's response
                     System.out.println(guess + " " + serverMsg);
-                    if (serverMsg.equals("BBBB")) {
+
+                    if ("BBBB".equals(serverMsg)) {
+                        // User has guessed the correct code
                         System.out.println();
-                        System.out.println("Congratulations!!! You guessed the code correctly in " + guessCount + " guesses");
+                        System.out.println("Congratulations!!! You guessed the code correctly in " + guessCount + " guesses.");
                         break;
                     }
                 }
 
+                // Prompt the user for their next guess
                 do {
                     System.out.print("Please enter your guess for the secret code or “QUIT” : ");
                     guess = scanner.nextLine().trim();
-                    if (guess.equalsIgnoreCase("QUIT")) {
+
+                    if ("QUIT".equalsIgnoreCase(guess)) {
+                        // User chooses to quit the game
                         System.out.println();
-                        System.out.println("Goodbye but please play again!");
+                        System.out.println("Goodbye, but please play again!");
                         out.println("QUIT");
                         return;
                     }
-                } while (!verifyInput(guess));
+                } while (!verifyInput(guess)); // Repeat until a valid input is provided
 
-                out.println(guess);
-                guessCount++;
+                out.println(guess); // Send the valid guess to the server
+                guessCount++;       // Increment the guess counter
             }
 
             if (guessCount == 20) {
+                // User has reached the maximum number of guesses
                 System.out.println();
                 System.out.println("Sorry – the game is over. You did not guess the code correctly in 20 moves.");
             }
@@ -55,13 +81,22 @@ public class BullsandCows {
         }
     }
 
-    public static boolean verifyInput(String gs) {
-        if (gs.equals("QUIT")) return true;
-        if (gs.length() != 4) {
+    /**
+     * Verifies that the user's input is a valid guess.
+     * A valid guess is either "QUIT" or a 4-digit string consisting only of digits 0-9.
+     *
+     * @param input The user's input string.
+     * @return true if the input is valid; false otherwise.
+     */
+    public static boolean verifyInput(String input) {
+        if ("QUIT".equalsIgnoreCase(input)) {
+            return true;
+        }
+        if (input.length() != 4) {
             System.out.println("Improperly formatted guess.");
             return false;
         }
-        for (char c : gs.toCharArray()) {
+        for (char c : input.toCharArray()) {
             if (!Character.isDigit(c)) {
                 System.out.println("Improperly formatted guess.");
                 return false;
