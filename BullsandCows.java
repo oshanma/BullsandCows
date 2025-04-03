@@ -7,12 +7,6 @@ import java.util.Scanner;
  * It connects to the game server, facilitates user interaction, and processes server responses.
  */
 public class BullsandCows {
-
-    /**
-     * The main method establishes a connection to the server and manages the game loop.
-     *
-     * @param args Command-line arguments (not used).
-     */
     public static void main(String[] args) {
         final int port = 12345; // Server port number
 
@@ -34,6 +28,7 @@ public class BullsandCows {
                 String serverMsg = in.readLine(); // Read message from the server
 
                 if ("GO".equals(serverMsg)) {
+                    
                     // Initial server message to start the game
                     System.out.println();
                     System.out.println("Welcome to Bulls and Cows. You will try to guess a 4-digit code using");
@@ -80,14 +75,7 @@ public class BullsandCows {
             e.printStackTrace();
         }
     }
-
-    /**
-     * Verifies that the user's input is a valid guess.
-     * A valid guess is either "QUIT" or a 4-digit string consisting only of digits 0-9.
-     *
-     * @param input The user's input string.
-     * @return true if the input is valid; false otherwise.
-     */
+    
     public static boolean verifyInput(String input) {
         if ("QUIT".equalsIgnoreCase(input)) {
             return true;
