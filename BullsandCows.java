@@ -1,13 +1,4 @@
-/*
-CSC 460 
-Program #2 [Client-Server (multi threaded) Bulls and Cows]
-Name: Oshan Maharjan
- */
 
-/**
- * The BullsandCows class represents the client-side implementation of the Bulls and Cows game.
- * It connects to the game server, facilitates user interaction, and processes server responses.
- */
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
